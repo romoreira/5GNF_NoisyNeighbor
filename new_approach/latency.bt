@@ -1,0 +1,45 @@
+// Script que monitora o overhead de um ÚNICO UE específico
+
+kprobe:gtp5g_handle_skb_ipv4
+{
+    // --- Lógica para extrair o IP ---
+    $skb = (struct sk_buff *)arg0;
+    $gtpu = $skb->data + 8;
+    $current_ue_ip = *(uint32 *)($gtpu + 8);
+
+    // --- FILTRO DE IP ---
+    // Altere o IP alvo aqui.
+    // O formato é (D << 24) | (C << 16) | (B << 8) | A
+    // Exemplo para 10.1.0.44
+    $target_ip = (44 << 24) | (0 << 16) | (1 << 8) | 10;
+
+    // O código abaixo só executa se o IP do pacote for o nosso alvo
+    if ($current_ue_ip == $target_ip) {
+        $skb_key = (uint64)arg0;
+        
+        // Armazena os dados para o pacote que nos interessa
+        @start[$skb_key] = nsecs;
+        @ip_map[$skb_key] = $current_ue_ip;
+    }
+}
+
+kprobe:netif_rx
+{
+    // Esta parte não precisa de mudanças. Ela só vai "disparar"
+    // para os pacotes que passaram pelo filtro acima.
+    $skb_key = (uint64)arg0;
+    
+    if (@start[$skb_key]) {
+        $start_ns = @start[$skb_key];
+        $ue_ip = @ip_map[$skb_key];
+        $delta = nsecs - $start_ns;
+
+        printf("UE IP: %d.%d.%d.%d | Decapsulation Overhead: %lld ns\n",
+            ($ue_ip >> 0) & 0xff, ($ue_ip >> 8) & 0xff,
+            ($ue_ip >> 16) & 0xff, ($ue_ip >> 24) & 0xff,
+            $delta);
+
+        delete(@start[$skb_key]);
+        delete(@ip_map[$skb_key]);
+    }
+}
