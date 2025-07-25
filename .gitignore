@@ -1,3 +1,6 @@
 # Ignorar pastas e arquivos sensíveis
 keys/
 dataset-applications/
+new_approach/5g-core-deployment/free5gc-k8s
+new_approach/5g-core-deployment/gtp5g
+new_approach/5g-core-deployment/testbed-automator
