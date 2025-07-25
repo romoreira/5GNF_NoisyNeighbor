@@ -1,2 +1,2 @@
 # ⚙️ PREREQUISITES (run once)
-## Migrated for the dir `new_approach`
+## Migrated to the dir `new_approach`
