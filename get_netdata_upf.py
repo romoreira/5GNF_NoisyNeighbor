@@ -1,6 +1,8 @@
 import os
 import requests
 
+from datetime import datetime, timezone
+
 # Diretório de destino
 output_dir = "resources_stats"
 os.makedirs(output_dir, exist_ok=True)
@@ -26,15 +28,32 @@ charts = [
 
 # Parâmetros fixos
 base_url = "http://127.0.0.1:19999/api/v1/data"
-uuid = "pode66752c1_4239_4c43_9459_b9290c1733f6"
-container_id = "1a36f7e76f2abfbdbd500495001583060caa30d223ba1c9976cf253e22bc53e7"
-after = 1751897846
-before = 1751897903
+uuid = "poddf7376fb_a478_4be0_8ed3_4cc228b3a39c"
+container_id = "3c4f2e26c8ea277d5269aacdc1fc134e7a00dfbea5f2b592673a9af89d91efff"
 
+
+# string original
+after = "Fri Jul 25 22:50:33 UTC 2025"
+before = "Fri Jul 25 22:51:10 UTC 2025"
+
+# converter para objeto datetime
+dt = datetime.strptime(after, "%a %b %d %H:%M:%S %Z %Y")
+# definir como UTC
+dt = dt.replace(tzinfo=timezone.utc)
+# converter para epoch
+after = int(dt.timestamp())
+
+
+# converter para objeto datetime
+dt = datetime.strptime(before, "%a %b %d %H:%M:%S %Z %Y")
+# definir como UTC
+dt = dt.replace(tzinfo=timezone.utc)
+# converter para epoch
+before = int(dt.timestamp())
 
 
 for chart in charts:
-    full_chart = f"cgroup_k8s_kubepods-slice_kubepods-burstable-slice_kubepods-burstable-{uuid}-slice_cri-containerd-{container_id}-scope.{chart}"
+    full_chart = f"cgroup_k8s_kubepods-slice_kubepods-{uuid}-slice_cri-containerd-{container_id}-scope.{chart}"
     params = {
         "chart": full_chart,
         "format": "csv",
