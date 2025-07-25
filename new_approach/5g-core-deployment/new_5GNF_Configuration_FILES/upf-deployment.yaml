@@ -20,9 +20,9 @@ spec:
         nf: upf
         name: upf
       annotations:
-        k8s.v1.cni.cncf.io/networks: '[
-          { "name": "n3network", "interface": "n3", "ips": [ "10.10.3.1/24" ] },
-          { "name": "n4network", "interface": "n4", "ips": [ "10.10.4.1/24" ] }
+        k8s.v1.cni.cncf.io/networks: '[ 
+          { "name": "n3network", "interface": "n3", "ips": [ "10.10.3.1/24" ] }, 
+          { "name": "n4network", "interface": "n4", "ips": [ "10.10.4.1/24" ] } 
         ]'
     spec:
       initContainers:
@@ -32,6 +32,13 @@ spec:
         - name: DEPENDENCIES
           value: nrf-nnrf:8000
         command: ["sh", "-c", "until nc -z $DEPENDENCIES; do echo waiting for the NRF; sleep 2; done;"]
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "64Mi"
+          limits:
+            cpu: "100m"
+            memory: "64Mi"
       containers:
       - name: upf
         image: ghcr.io/niloysh/free5gc:v3.2.0
@@ -58,11 +65,11 @@ spec:
           protocol: UDP
         resources:
           requests:
-            memory: "100Mi"
-            cpu: "100m"
+            memory: "512Mi"
+            cpu: "1"
           limits:
             memory: "512Mi"
-            cpu: "250m"
+            cpu: "1"
         securityContext:
           privileged: true
           capabilities:
